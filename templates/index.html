@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Backup Manager</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="hero">
+        <h1>Backup Manager</h1>
+        <p>Einfaches Ubuntu-Interface für Backup starten, Status prüfen, Ziel wählen und abbrechen.</p>
+      </div>
+
+      <div class="controls">
+        <button id="startBackup">Backup starten</button>
+        <button id="checkStatus">Status ansehen</button>
+        <button id="abortBackup" class="danger">Backup abbrechen</button>
+      </div>
+
+      <div class="config-panel">
+        <label for="targetPath">Backup-Ziel wählen</label>
+        <div class="field-row">
+          <input id="targetPath" type="text" placeholder="z. B. /mnt/backup" />
+          <button id="saveTarget">Speichern</button>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <h2>Status</h2>
+        <pre id="statusText">Lade...</pre>
+      </div>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

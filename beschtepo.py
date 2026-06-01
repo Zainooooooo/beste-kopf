@@ -91,12 +91,13 @@ def folder_size(path: Path) -> int:
     return total
 
 def run_backup(manual: bool = True):
-    global _current_job
+    global _current_job, _abort_requested
     cfg = get_config()
 
     with _lock:
         if _current_job and _current_job.get("status") == "running":
             return
+        _abort_requested = False
         _current_job = {
             "status": "running", "manual": manual, "progress": 0,
             "started": datetime.now().isoformat(timespec="seconds"),
@@ -128,6 +129,8 @@ def run_backup(manual: bool = True):
             raise RuntimeError("Keine gültigen Quellen gefunden.")
 
         for i, src in enumerate(valid):
+            if _abort_requested:
+                raise RuntimeError("Backup abgebrochen")
             sp = Path(src)
             log(f"Sichere: {sp}")
             dest = snapshot / sp.name
@@ -139,6 +142,8 @@ def run_backup(manual: bool = True):
                 log(f"  → {round(size/1e6,1)} MB kopiert")
             except Exception as e:
                 log(f"  ! Fehler: {e}")
+            if _abort_requested:
+                raise RuntimeError("Backup abgebrochen")
             _current_job["progress"] = int((i + 1) / len(valid) * 100)
             _current_job["size_mb"] = round(total_bytes / 1e6, 1)
 
@@ -185,6 +190,8 @@ def cleanup_old_snapshots(target: Path, days: int, log):
 
 # ---------- Scheduler ----------
 _scheduler = None
+_abort_requested = False
+
 def setup_scheduler():
     global _scheduler
     if not HAS_SCHED: return
@@ -245,6 +252,7 @@ def api_status():
         "target_info": info,
         "config": cfg,
         "current": _current_job,
+        "abort_requested": _abort_requested,
         "last_backup": last,
         "scheduler_active": _scheduler.running if _scheduler else False,
     }
@@ -265,6 +273,14 @@ def api_start():
         if _current_job and _current_job.get("status") == "running":
             raise HTTPException(409, "Backup läuft bereits.")
     threading.Thread(target=run_backup, args=(True,), daemon=True).start()
+    return {"ok": True}
+
+@app.post("/api/backup/abort")
+def api_abort():
+    global _abort_requested
+    if not _current_job or _current_job.get("status") != "running":
+        raise HTTPException(400, "Kein laufendes Backup zum Abbrechen.")
+    _abort_requested = True
     return {"ok": True}
 
 @app.get("/api/history")
