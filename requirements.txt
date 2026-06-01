@@ -1,0 +1,7 @@
+fastapi
+pydantic
+apscheduler
+psutil
+jinja2
+uvicorn
+aiofiles
