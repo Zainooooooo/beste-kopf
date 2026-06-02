@@ -237,50 +237,52 @@ def index():
 
 def get_mounted_drives() -> list[dict]:
     drives = []
-    # System-Verzeichnisse und Dateisysteme, die zu filtern sind
-    skip_mountpoints = ('/', '/boot', '/efi', '/var', '/tmp', '/home', '/sys', '/proc', '/dev', '/run')
-    skip_filesystems = ('vfat', 'tmpfs', 'ramfs', 'squashfs', 'isofs')
     
-    if HAS_PSUTIL:
-        for p in psutil.disk_partitions(all=False):
-            if not p.device.startswith(('/dev/', 'C:')):
+    if HAS_PSUTIL or platform.system() == 'Linux':
+        partitions = []
+        if HAS_PSUTIL:
+            partitions = psutil.disk_partitions(all=False)
+        else:
+            # Fallback für /proc/mounts
+            try:
+                with open('/proc/mounts', encoding='utf-8') as f:
+                    for line in f:
+                        parts = line.split()
+                        if len(parts) < 3:
+                            continue
+                        device, mountpoint, fstype = parts[:3]
+                        if not device.startswith('/dev/'):
+                            continue
+                        partitions.append((device, mountpoint, fstype, parts[3] if len(parts) > 3 else ''))
+            except Exception:
+                pass
+        
+        for p in partitions:
+            if isinstance(p, tuple):
+                device, mountpoint, fstype, opts = p
+            else:
+                device, mountpoint, fstype, opts = p.device, p.mountpoint, p.fstype, p.opts
+            
+            if not device.startswith('/dev/'):
                 continue
-            if any(skip in p.device for skip in ('loop', 'ram', 'sr', 'fd')):
+            
+            # Extrahiere Device-Name (z.B. 'sda' aus '/dev/sda1')
+            device_name = device.split('/')[-1].rstrip('0123456789')
+            removable_path = f'/sys/block/{device_name}/removable'
+            
+            # Nur USB/removable Laufwerke anzeigen
+            try:
+                with open(removable_path) as f:
+                    if f.read().strip() == '1':
+                        drives.append({
+                            'device': device,
+                            'mountpoint': mountpoint,
+                            'fstype': fstype,
+                            'opts': opts,
+                        })
+            except (FileNotFoundError, OSError):
                 continue
-            if any(skip in p.mountpoint for skip in skip_mountpoints):
-                continue
-            if p.fstype in skip_filesystems:
-                continue
-            drives.append({
-                'device': p.device,
-                'mountpoint': p.mountpoint,
-                'fstype': p.fstype,
-                'opts': p.opts,
-            })
-    elif platform.system() == 'Linux':
-        try:
-            with open('/proc/mounts', encoding='utf-8') as f:
-                for line in f:
-                    parts = line.split()
-                    if len(parts) < 3:
-                        continue
-                    device, mountpoint, fstype = parts[:3]
-                    if not device.startswith('/dev/'):
-                        continue
-                    if any(skip in device for skip in ('loop', 'ram', 'sr', 'fd')):
-                        continue
-                    if any(skip in mountpoint for skip in skip_mountpoints):
-                        continue
-                    if fstype in skip_filesystems:
-                        continue
-                    drives.append({
-                        'device': device,
-                        'mountpoint': mountpoint,
-                        'fstype': fstype,
-                        'opts': parts[3] if len(parts) > 3 else '',
-                    })
-        except Exception:
-            pass
+    
     return drives
 
 @app.get("/api/drives")
