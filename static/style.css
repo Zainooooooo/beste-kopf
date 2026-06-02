@@ -66,6 +66,72 @@ button.danger {
   color: #fff;
 }
 
+.selection-row {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media(min-width: 840px) {
+  .selection-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.selection-box {
+  display: grid;
+  gap: 10px;
+}
+
+.drive-section {
+  margin-bottom: 20px;
+}
+
+.drive-list {
+  display: grid;
+  gap: 12px;
+}
+
+.drive-card {
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  display: grid;
+  gap: 12px;
+}
+
+.drive-title {
+  color: #eef2ff;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.drive-title span {
+  color: #c8d2ff;
+  font-size: 0.9rem;
+}
+
+.drive-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.drive-button {
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(139,92,246,0.85);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.drive-button:hover {
+  filter: brightness(1.05);
+}
+
 .field-row {
   display: grid;
   grid-template-columns: 1fr auto;

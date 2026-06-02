@@ -21,22 +21,38 @@
         </div>
 
         <div class="config-panel">
-          <div class="panel-header">
-            <div>
-              <p class="section-label">Backup-Ziel</p>
+          <div class="selection-row">
+            <div class="selection-box">
+              <p class="section-label">Quellgerät wählen</p>
+              <div class="field-row">
+                <input id="sourcePath" type="text" readonly placeholder="Tippe unten, um eine Quelle zu wählen" />
+                <button id="saveSource">Quellort speichern</button>
+              </div>
+            </div>
+            <div class="selection-box">
+              <p class="section-label">Backup-Ziel wählen</p>
               <div class="field-row">
                 <input id="targetPath" type="text" readonly placeholder="Tippe unten, um ein Ziel zu wählen" />
                 <button id="saveTarget">Ziel speichern</button>
               </div>
             </div>
           </div>
+
+          <div class="drive-section">
+            <p class="section-label">Verfügbare Laufwerke</p>
+            <div id="driveList" class="drive-list">Lade Laufwerke...</div>
+          </div>
+
           <div class="browse-panel">
             <div class="breadcrumbs" id="breadcrumbs"></div>
             <div class="browse-list" id="browseList">Wähle einen Ordner aus.</div>
-      <div class="status-card">
-        <h2>Status</h2>
-        <pre id="statusText">Lade...</pre>
-      </div>
+          </div>
+        </div>
+
+        <div class="status-card">
+          <h2>Status</h2>
+          <pre id="statusText">Lade...</pre>
+        </div>
     </section>
   </main>
   <script src="/static/app.js"></script>

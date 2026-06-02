@@ -235,6 +235,46 @@ def index():
     html_path = ROOT / "templates" / "index.html"
     return HTMLResponse(html_path.read_text(encoding="utf-8"))
 
+def get_mounted_drives() -> list[dict]:
+    drives = []
+    if HAS_PSUTIL:
+        for p in psutil.disk_partitions(all=False):
+            if not p.device.startswith(('/dev/', 'C:')):
+                continue
+            if any(skip in p.device for skip in ('loop', 'ram', 'sr', 'fd', 'tmpfs')):
+                continue
+            drives.append({
+                'device': p.device,
+                'mountpoint': p.mountpoint,
+                'fstype': p.fstype,
+                'opts': p.opts,
+            })
+    elif platform.system() == 'Linux':
+        try:
+            with open('/proc/mounts', encoding='utf-8') as f:
+                for line in f:
+                    parts = line.split()
+                    if len(parts) < 3:
+                        continue
+                    device, mountpoint, fstype = parts[:3]
+                    if not device.startswith('/dev/'):
+                        continue
+                    if any(skip in device for skip in ('loop', 'ram', 'sr', 'fd', 'tmpfs')):
+                        continue
+                    drives.append({
+                        'device': device,
+                        'mountpoint': mountpoint,
+                        'fstype': fstype,
+                        'opts': parts[3] if len(parts) > 3 else '',
+                    })
+        except Exception:
+            pass
+    return drives
+
+@app.get("/api/drives")
+def api_drives():
+    return {"drives": get_mounted_drives()}
+
 @app.get("/api/status")
 def api_status():
     cfg = get_config()

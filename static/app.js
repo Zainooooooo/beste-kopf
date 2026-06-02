@@ -1,7 +1,9 @@
 const statusText = document.getElementById('statusText');
+const sourcePathInput = document.getElementById('sourcePath');
 const targetPathInput = document.getElementById('targetPath');
 const browseList = document.getElementById('browseList');
 const breadcrumbs = document.getElementById('breadcrumbs');
+const driveList = document.getElementById('driveList');
 let currentBrowsePath = '';
 
 async function fetchStatus() {
@@ -12,10 +14,63 @@ async function fetchStatus() {
     if (data.config?.target) {
       targetPathInput.value = data.config.target;
     }
+    if (data.config?.sources?.length) {
+      sourcePathInput.value = data.config.sources[0];
+    }
     await loadDirectory('');
+    await loadDrives();
   } catch (error) {
     statusText.textContent = 'Fehler beim Laden des Status.\n' + error;
   }
+}
+
+async function loadDrives() {
+  try {
+    const res = await fetch('/api/drives');
+    const data = await res.json();
+    driveList.innerHTML = '';
+    if (!data.drives?.length) {
+      driveList.textContent = 'Keine Laufwerke gefunden.';
+      return;
+    }
+    data.drives.forEach((drive) => {
+      const card = document.createElement('div');
+      card.className = 'drive-card';
+
+      const title = document.createElement('div');
+      title.className = 'drive-title';
+      title.innerHTML = `<strong>${drive.mountpoint}</strong><br><span>${drive.device} • ${drive.fstype}</span>`;
+
+      const actions = document.createElement('div');
+      actions.className = 'drive-actions';
+
+      const sourceButton = document.createElement('button');
+      sourceButton.type = 'button';
+      sourceButton.className = 'drive-button';
+      sourceButton.textContent = 'Als Quelle';
+      sourceButton.addEventListener('click', () => selectSource(drive.mountpoint));
+
+      const targetButton = document.createElement('button');
+      targetButton.type = 'button';
+      targetButton.className = 'drive-button';
+      targetButton.textContent = 'Als Ziel';
+      targetButton.addEventListener('click', () => selectTarget(drive.mountpoint));
+
+      actions.appendChild(sourceButton);
+      actions.appendChild(targetButton);
+      card.appendChild(title);
+      card.appendChild(actions);
+      driveList.appendChild(card);
+    });
+  } catch (error) {
+    driveList.textContent = 'Fehler beim Laden der Laufwerke.';
+    console.error(error);
+  }
+}
+
+function selectSource(path) {
+  sourcePathInput.value = path;
+  statusText.textContent = `Quelle ausgewählt: ${path}`;
 }
 
 function formatStatus(data) {
@@ -93,11 +148,6 @@ function renderBreadcrumbs(path) {
   });
 }
 
-function selectTarget(path) {
-  targetPathInput.value = path;
-  statusText.textContent = `Ziel ausgewählt: ${path}`;
-}
-
 async function loadDirectory(path) {
   currentBrowsePath = path;
   try {
@@ -130,14 +180,52 @@ async function loadDirectory(path) {
 }
 
 document.getElementById('startBackup').addEventListener('click', async () => {
+  if (!sourcePathInput.value.trim() || !targetPathInput.value.trim()) {
+    statusText.textContent = 'Quelle und Ziel müssen ausgewählt werden.';
+    return;
+  }
   statusText.textContent = 'Backup wird gestartet...';
+  const currentConfig = await action('/api/config');
+  const payload = {
+    ...currentConfig,
+    sources: [sourcePathInput.value.trim()],
+    target: targetPathInput.value.trim(),
+  };
+  await action('/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
   await action('/api/backup/start', { method: 'POST' });
   await fetchStatus();
 });
 
 document.getElementById('checkStatus').addEventListener('click', fetchStatus);
 
+document.getElementById('saveSource').addEventListener('click', async () => {
+  if (!sourcePathInput.value.trim()) {
+    statusText.textContent = 'Wähle zuerst eine Quelle aus.';
+    return;
+  }
+  statusText.textContent = 'Speichere Quellort...';
+  const currentConfig = await action('/api/config');
+  const payload = {
+    ...currentConfig,
+    sources: [sourcePathInput.value.trim()],
+  };
+  await action('/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await fetchStatus();
+});
+
 document.getElementById('saveTarget').addEventListener('click', async () => {
+  if (!targetPathInput.value.trim()) {
+    statusText.textContent = 'Wähle zuerst ein Ziel aus.';
+    return;
+  }
   statusText.textContent = 'Speichere Backup-Ziel...';
   const currentConfig = await action('/api/config');
   const payload = {
