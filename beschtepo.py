@@ -5,10 +5,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 try:
@@ -226,15 +225,15 @@ class ConfigModel(BaseModel):
 # ---------- App ----------
 app = FastAPI(title="venta Backup Manager")
 app.mount("/static", StaticFiles(directory=str(ROOT / "static")), name="static")
-templates = Jinja2Templates(directory=str(ROOT / "templates"))
 
 @app.on_event("startup")
 def _startup():
     setup_scheduler()
 
 @app.get("/", response_class=HTMLResponse)
-def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def index():
+    html_path = ROOT / "templates" / "index.html"
+    return HTMLResponse(html_path.read_text(encoding="utf-8"))
 
 @app.get("/api/status")
 def api_status():
