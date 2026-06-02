@@ -248,9 +248,21 @@ document.getElementById('saveTarget').addEventListener('click', async () => {
 });
 
 document.getElementById('abortBackup').addEventListener('click', async () => {
-  statusText.textContent = 'Sende Abbruch-Anfrage...';
-  await action('/api/backup/abort', { method: 'POST' });
-  await fetchStatus();
+  try {
+    const statusRes = await fetch('/api/status');
+    const statusData = await statusRes.json();
+    
+    if (!statusData.current?.status || statusData.current.status !== 'running') {
+      statusText.textContent = 'Kein laufendes Backup zum Abbrechen.';
+      return;
+    }
+    
+    statusText.textContent = 'Sende Abbruch-Anfrage...';
+    await action('/api/backup/abort', { method: 'POST' });
+    await fetchStatus();
+  } catch (error) {
+    statusText.textContent = 'Fehler: ' + error;
+  }
 });
 
 fetchStatus();
