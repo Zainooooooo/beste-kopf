@@ -237,11 +237,19 @@ def index():
 
 def get_mounted_drives() -> list[dict]:
     drives = []
+    # System-Verzeichnisse und Dateisysteme, die zu filtern sind
+    skip_mountpoints = ('/', '/boot', '/efi', '/var', '/tmp', '/home', '/sys', '/proc', '/dev', '/run')
+    skip_filesystems = ('vfat', 'tmpfs', 'ramfs', 'squashfs', 'isofs')
+    
     if HAS_PSUTIL:
         for p in psutil.disk_partitions(all=False):
             if not p.device.startswith(('/dev/', 'C:')):
                 continue
-            if any(skip in p.device for skip in ('loop', 'ram', 'sr', 'fd', 'tmpfs')):
+            if any(skip in p.device for skip in ('loop', 'ram', 'sr', 'fd')):
+                continue
+            if any(skip in p.mountpoint for skip in skip_mountpoints):
+                continue
+            if p.fstype in skip_filesystems:
                 continue
             drives.append({
                 'device': p.device,
@@ -259,7 +267,11 @@ def get_mounted_drives() -> list[dict]:
                     device, mountpoint, fstype = parts[:3]
                     if not device.startswith('/dev/'):
                         continue
-                    if any(skip in device for skip in ('loop', 'ram', 'sr', 'fd', 'tmpfs')):
+                    if any(skip in device for skip in ('loop', 'ram', 'sr', 'fd')):
+                        continue
+                    if any(skip in mountpoint for skip in skip_mountpoints):
+                        continue
+                    if fstype in skip_filesystems:
                         continue
                     drives.append({
                         'device': device,
