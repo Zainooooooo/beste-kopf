@@ -1,5 +1,8 @@
 const statusText = document.getElementById('statusText');
 const targetPathInput = document.getElementById('targetPath');
+const browseList = document.getElementById('browseList');
+const breadcrumbs = document.getElementById('breadcrumbs');
+let currentBrowsePath = '';
 
 async function fetchStatus() {
   try {
@@ -9,6 +12,7 @@ async function fetchStatus() {
     if (data.config?.target) {
       targetPathInput.value = data.config.target;
     }
+    await loadDirectory('');
   } catch (error) {
     statusText.textContent = 'Fehler beim Laden des Status.\n' + error;
   }
@@ -62,6 +66,66 @@ async function action(url, options = {}) {
   } catch (error) {
     statusText.textContent = 'Fehler: ' + error;
     throw error;
+  }
+}
+
+function renderBreadcrumbs(path) {
+  const parts = path ? path.split(/\\|\//).filter(Boolean) : [];
+  let prefix = path && path.startsWith('/') ? '/' : '';
+  breadcrumbs.innerHTML = '';
+  const rootButton = document.createElement('button');
+  rootButton.type = 'button';
+  rootButton.className = 'breadcrumb-item';
+  rootButton.textContent = path ? 'Root' : 'Aktueller Speicherort';
+  rootButton.addEventListener('click', () => loadDirectory(''));
+  breadcrumbs.appendChild(rootButton);
+
+  let cur = prefix;
+  parts.forEach((part, index) => {
+    cur += part;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'breadcrumb-item';
+    button.textContent = part;
+    button.addEventListener('click', () => loadDirectory(cur));
+    breadcrumbs.appendChild(button);
+    cur += '/';
+  });
+}
+
+function selectTarget(path) {
+  targetPathInput.value = path;
+  statusText.textContent = `Ziel ausgewählt: ${path}`;
+}
+
+async function loadDirectory(path) {
+  currentBrowsePath = path;
+  try {
+    const url = path ? `/api/browse?path=${encodeURIComponent(path)}` : '/api/browse';
+    const res = await fetch(url);
+    const data = await res.json();
+    renderBreadcrumbs(data.path || '');
+    browseList.innerHTML = '';
+    if (data.entries.length === 0) {
+      browseList.textContent = 'Keine Verzeichnisse gefunden.';
+      return;
+    }
+    data.entries.forEach((entry) => {
+      if (!entry.is_dir) return;
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'browse-item';
+      item.textContent = entry.name;
+      item.addEventListener('click', () => {
+        const newPath = entry.path;
+        selectTarget(newPath);
+        loadDirectory(newPath);
+      });
+      browseList.appendChild(item);
+    });
+  } catch (error) {
+    browseList.textContent = 'Fehler beim Laden des Ordnerverzeichnisses.';
+    console.error(error);
   }
 }
 

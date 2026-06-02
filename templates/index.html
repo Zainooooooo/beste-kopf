@@ -3,31 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Backup Manager</title>
-  <link rel="stylesheet" href="/static/style.css" />
-</head>
-<body>
-  <main class="page">
-    <section class="card">
-      <div class="hero">
-        <h1>Backup Manager</h1>
-        <p>Einfaches Ubuntu-Interface für Backup starten, Status prüfen, Ziel wählen und abbrechen.</p>
-      </div>
-
-      <div class="controls">
-        <button id="startBackup">Backup starten</button>
-        <button id="checkStatus">Status ansehen</button>
-        <button id="abortBackup" class="danger">Backup abbrechen</button>
-      </div>
-
-      <div class="config-panel">
-        <label for="targetPath">Backup-Ziel wählen</label>
-        <div class="field-row">
-          <input id="targetPath" type="text" placeholder="z. B. /mnt/backup" />
-          <button id="saveTarget">Speichern</button>
+    <title>Backup Station</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <div class="hero">
+          <h1>Backup Station</h1>
+          <p>Touchscreen-gesteuerte Backup Station zum Starten, Überwachen und Auswählen des Targets.</p>
         </div>
-      </div>
 
+        <div class="controls">
+          <button id="startBackup">Backup starten</button>
+          <button id="checkStatus">Status prüfen</button>
+          <button id="abortBackup" class="danger">Backup abbrechen</button>
+        </div>
+
+        <div class="config-panel">
+          <div class="panel-header">
+            <div>
+              <p class="section-label">Backup-Ziel</p>
+              <div class="field-row">
+                <input id="targetPath" type="text" readonly placeholder="Tippe unten, um ein Ziel zu wählen" />
+                <button id="saveTarget">Ziel speichern</button>
+              </div>
+            </div>
+          </div>
+          <div class="browse-panel">
+            <div class="breadcrumbs" id="breadcrumbs"></div>
+            <div class="browse-list" id="browseList">Wähle einen Ordner aus.</div>
       <div class="status-card">
         <h2>Status</h2>
         <pre id="statusText">Lade...</pre>
