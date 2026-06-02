@@ -71,6 +71,13 @@ async function loadDrives() {
 function selectSource(path) {
   sourcePathInput.value = path;
   statusText.textContent = `Quelle ausgewählt: ${path}`;
+  loadDirectory(path);
+}
+
+function selectTarget(path) {
+  targetPathInput.value = path;
+  statusText.textContent = `Ziel ausgewählt: ${path}`;
+  loadDirectory(path);
 }
 
 function formatStatus(data) {
