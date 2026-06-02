@@ -238,6 +238,9 @@ def index():
 def get_mounted_drives() -> list[dict]:
     drives = []
     
+    # System-Verzeichnisse ausschließen
+    system_paths = {'/', '/boot', '/efi', '/boot/efi', '/var', '/tmp', '/home', '/sys', '/proc', '/dev', '/run', '/usr'}
+    
     if HAS_PSUTIL or platform.system() == 'Linux':
         partitions = []
         if HAS_PSUTIL:
@@ -266,22 +269,27 @@ def get_mounted_drives() -> list[dict]:
             if not device.startswith('/dev/'):
                 continue
             
-            # Extrahiere Device-Name (z.B. 'sda' aus '/dev/sda1')
+            # 1. Ausschließe System-Mountpoints
+            if mountpoint in system_paths or mountpoint.startswith(tuple(sp + '/' for sp in system_paths if sp != '/')):
+                continue
+            
+            # 2. Prüfe ob removable device ist
             device_name = device.split('/')[-1].rstrip('0123456789')
             removable_path = f'/sys/block/{device_name}/removable'
             
-            # Nur USB/removable Laufwerke anzeigen
             try:
                 with open(removable_path) as f:
-                    if f.read().strip() == '1':
-                        drives.append({
-                            'device': device,
-                            'mountpoint': mountpoint,
-                            'fstype': fstype,
-                            'opts': opts,
-                        })
+                    if f.read().strip() != '1':
+                        continue
             except (FileNotFoundError, OSError):
                 continue
+            
+            drives.append({
+                'device': device,
+                'mountpoint': mountpoint,
+                'fstype': fstype,
+                'opts': opts,
+            })
     
     return drives
 
