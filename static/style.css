@@ -25,7 +25,8 @@ body {
 .hero h1 {
   margin: 0;
   font-size: clamp(2rem, 3vw, 3rem);
-  color: #3b82f6;
+  color: #3b82f6 !important;
+  -webkit-text-stroke: 0.2px rgba(0,0,0,0.08);
 }
 
 .hero p {
