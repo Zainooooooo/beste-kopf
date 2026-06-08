@@ -291,6 +291,34 @@ def get_mounted_drives() -> list[dict]:
 def api_drives():
     return {"drives": get_mounted_drives()}
 
+@app.get("/api/debug/drives")
+def api_debug_drives():
+    """Debug endpoint to see all partitions and why they are filtered."""
+    system_paths = {'/', '/boot', '/efi', '/boot/efi', '/var', '/tmp', '/home', '/sys', '/proc', '/dev', '/run', '/usr'}
+    system_devices = ('loop', 'ram', 'sr', 'fd', 'tmpfs', 'devtmpfs')
+    
+    all_partitions = []
+    if HAS_PSUTIL:
+        for p in psutil.disk_partitions(all=False):
+            reason = None
+            if not p.device.startswith('/dev/'):
+                reason = "device does not start with /dev/"
+            elif any(skip in p.device for skip in system_devices):
+                reason = f"device contains system marker: {[s for s in system_devices if s in p.device]}"
+            elif p.mountpoint in system_paths:
+                reason = f"mountpoint is system path: {p.mountpoint}"
+            elif any(p.mountpoint.startswith(sp + '/') for sp in system_paths if sp != '/'):
+                reason = f"mountpoint is under system path"
+            
+            all_partitions.append({
+                'device': p.device,
+                'mountpoint': p.mountpoint,
+                'fstype': p.fstype,
+                'reason_filtered': reason
+            })
+    
+    return {"all_partitions": all_partitions}
+
 @app.get("/api/status")
 def api_status():
     cfg = get_config()
