@@ -25,6 +25,7 @@ body {
 .hero h1 {
   margin: 0;
   font-size: clamp(2rem, 3vw, 3rem);
+  color: #3b82f6;
 }
 
 .hero p {
