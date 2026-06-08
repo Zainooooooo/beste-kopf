@@ -240,6 +240,7 @@ def get_mounted_drives() -> list[dict]:
     
     # System-Verzeichnisse ausschließen
     system_paths = {'/', '/boot', '/efi', '/boot/efi', '/var', '/tmp', '/home', '/sys', '/proc', '/dev', '/run', '/usr'}
+    system_devices = ('loop', 'ram', 'sr', 'fd', 'tmpfs', 'devtmpfs')
     
     if HAS_PSUTIL or platform.system() == 'Linux':
         partitions = []
@@ -269,42 +270,12 @@ def get_mounted_drives() -> list[dict]:
             if not device.startswith('/dev/'):
                 continue
             
-            # 1. Ausschließe System-Mountpoints
-            if mountpoint in system_paths or mountpoint.startswith(tuple(sp + '/' for sp in system_paths if sp != '/')):
+            # Skip virtual und system devices
+            if any(skip in device for skip in system_devices):
                 continue
             
-            # 2. Prüfe ob removable device ist. Manche externe HDDs setzen
-            # 'removable' nicht; als Fallback prüfen wir, ob das Device über
-            # einen USB-Transport verbunden ist (z.B. in /sys/block/.../device Pfad).
-            device_name = device.split('/')[-1].rstrip('0123456789')
-            removable_path = f'/sys/block/{device_name}/removable'
-            is_removable = False
-            try:
-                with open(removable_path) as f:
-                    is_removable = f.read().strip() == '1'
-            except (FileNotFoundError, OSError):
-                is_removable = False
-
-            # Fallback: untersuche den realpath des device 'device' Eintrags
-            # und suche nach 'usb' im Pfad. Das fängt externe HDDs in USB-Gehäusen ab.
-            if not is_removable:
-                try:
-                    devsys = Path(f"/sys/block/{device_name}/device").resolve()
-                    if 'usb' in str(devsys):
-                        is_removable = True
-                    else:
-                        # Manchmal ist das Gerät ein Partitionseintrag (/sys/block/sdb/sdb1)
-                        # dann prüfen wir parent links
-                        parent = devsys
-                        for _ in range(4):
-                            parent = parent.parent
-                            if 'usb' in str(parent):
-                                is_removable = True
-                                break
-                except Exception:
-                    is_removable = False
-
-            if not is_removable:
+            # Ausschließe System-Mountpoints
+            if mountpoint in system_paths or mountpoint.startswith(tuple(sp + '/' for sp in system_paths if sp != '/')):
                 continue
             
             drives.append({
