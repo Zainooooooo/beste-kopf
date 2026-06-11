@@ -388,6 +388,10 @@ pre {
     grid-template-columns: 1.55fr 1fr;
   }
 
+  .config-card {
+    grid-column: span 2;
+  }
+
   .browse-card {
     grid-column: span 2;
   }
