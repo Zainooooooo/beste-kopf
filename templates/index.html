@@ -3,56 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Backup Station</title>
-    <link rel="stylesheet" href="/static/style.css" />
-  </head>
-  <body>
-    <main class="page">
-      <section class="card">
-        <div class="hero">
-          <h1 style="color: #3b82f6 !important;">Backup Station</h1>
-          <p>Touchscreen-gesteuerte Backup Station zum Starten, Überwachen und Auswählen des Targets.</p>
+  <title>Backup Station</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="dashboard-shell">
+      <header class="hero-card card">
+        <div>
+          <span class="eyebrow">Backup Station</span>
+          <h1>Backup Station</h1>
+          <p>Touchscreen-gesteuerte Backup Station zum Starten, Überwachen und Verwalten deiner Sicherungen.</p>
         </div>
-
-        <div class="controls">
-          <button id="startBackup">Backup starten</button>
-          <button id="checkStatus">Status prüfen</button>
-          <button id="abortBackup" class="danger">Backup abbrechen</button>
+        <div class="hero-meta">
+          <span class="hero-pill">Schnellzugriff</span>
+          <span class="hero-pill">Intuitiv</span>
         </div>
+      </header>
 
-        <div class="config-panel">
+      <div class="grid-panel">
+        <article class="card action-card">
+          <div class="card-header">
+            <span class="line-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M12 4v16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div>
+              <h2>Aktionen</h2>
+              <p class="card-note">Schneller Zugriff auf Backup-Befehle.</p>
+            </div>
+          </div>
+
+          <div class="controls">
+            <button id="startBackup">Backup starten</button>
+            <button id="checkStatus">Status prüfen</button>
+            <button id="abortBackup" class="danger">Backup abbrechen</button>
+          </div>
+        </article>
+
+        <article class="card config-card">
+          <div class="card-header">
+            <span class="line-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </span>
+            <div>
+              <h2>Konfiguration</h2>
+              <p class="card-note">Wähle Quelle, Ziel und verfügbare Laufwerke.</p>
+            </div>
+          </div>
+
           <div class="selection-row">
             <div class="selection-box">
               <p class="section-label">Quellgerät wählen</p>
               <div class="field-row">
                 <input id="sourcePath" type="text" readonly placeholder="Tippe unten, um eine Quelle zu wählen" />
-                <button id="saveSource">Quellort speichern</button>
+                <button id="saveSource">Speichern</button>
               </div>
             </div>
             <div class="selection-box">
               <p class="section-label">Backup-Ziel wählen</p>
               <div class="field-row">
                 <input id="targetPath" type="text" readonly placeholder="Tippe unten, um ein Ziel zu wählen" />
-                <button id="saveTarget">Ziel speichern</button>
+                <button id="saveTarget">Speichern</button>
               </div>
             </div>
           </div>
 
           <div class="drive-section">
-            <p class="section-label">Verfügbare Laufwerke</p>
+            <div class="section-head">
+              <p class="section-label">Verfügbare Laufwerke</p>
+            </div>
             <div id="driveList" class="drive-list">Lade Laufwerke...</div>
+          </div>
+        </article>
+
+        <article class="card browse-card">
+          <div class="card-header">
+            <span class="line-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </span>
+            <div>
+              <h2>Durchsuchen</h2>
+              <p class="card-note">Wähle einen Ordner oder liefer dir Orientierung über Pfade.</p>
+            </div>
           </div>
 
           <div class="browse-panel">
             <div class="breadcrumbs" id="breadcrumbs"></div>
             <div class="browse-list" id="browseList">Wähle einen Ordner aus.</div>
           </div>
-        </div>
+        </article>
 
-        <div class="status-card">
-          <h2>Status</h2>
+        <article class="card status-card">
+          <div class="card-header">
+            <span class="line-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5l4.5-4.5 3 3 8-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div>
+              <h2>Status</h2>
+              <p class="card-note">Aktueller Zustand der Sicherung in Echtzeit.</p>
+            </div>
+          </div>
           <pre id="statusText">Lade...</pre>
-        </div>
+        </article>
+      </div>
     </section>
   </main>
   <script src="/static/app.js"></script>

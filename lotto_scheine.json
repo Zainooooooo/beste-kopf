@@ -1,0 +1,152 @@
+[
+    {
+        "Tipp": [
+            7,
+            10,
+            24,
+            26,
+            30,
+            41
+        ],
+        "Superzahl": 9,
+        "Ziehung": [
+            21,
+            25,
+            32,
+            44,
+            45,
+            47
+        ],
+        "Ziehung_Super": 6,
+        "Ergebnis": {
+            "Gewinnklasse": 0,
+            "Gewinnernachricht": "Kein Gewinn",
+            "Gewinnpreis": 0.0
+        }
+    },
+    {
+        "Tipp": [
+            3,
+            11,
+            18,
+            20,
+            32,
+            44
+        ],
+        "Superzahl": 9,
+        "Ziehung": [
+            3,
+            6,
+            7,
+            30,
+            41,
+            45
+        ],
+        "Ziehung_Super": 4,
+        "Ergebnis": {
+            "Gewinnklasse": 0,
+            "Gewinnernachricht": "Kein Gewinn",
+            "Gewinnpreis": 0.0
+        }
+    },
+    {
+        "Tipp": [
+            7,
+            13,
+            17,
+            43,
+            44,
+            46
+        ],
+        "Superzahl": 5,
+        "Ziehung": [
+            14,
+            17,
+            29,
+            32,
+            45,
+            46
+        ],
+        "Ziehung_Super": 7,
+        "Ergebnis": {
+            "Gewinnklasse": 0,
+            "Gewinnernachricht": "Kein Gewinn",
+            "Gewinnpreis": 0.0
+        }
+    },
+    {
+        "Tipp": [
+            6,
+            16,
+            22,
+            32,
+            48,
+            49
+        ],
+        "Superzahl": 3,
+        "Ziehung": [
+            5,
+            23,
+            24,
+            35,
+            36,
+            41
+        ],
+        "Ziehung_Super": 3,
+        "Ergebnis": {
+            "Gewinnklasse": 0,
+            "Gewinnernachricht": "Kein Gewinn",
+            "Gewinnpreis": 0.0
+        }
+    },
+    {
+        "Tipp": [
+            2,
+            10,
+            19,
+            28,
+            37,
+            46
+        ],
+        "Superzahl": 4,
+        "Ziehung": [
+            4,
+            7,
+            11,
+            17,
+            27,
+            33
+        ],
+        "Ziehung_Super": 0,
+        "Ergebnis": {
+            "Gewinnklasse": 0,
+            "Gewinnernachricht": "Kein Gewinn",
+            "Gewinnpreis": 0.0
+        }
+    },
+    {
+        "Tipp": [
+            4,
+            6,
+            15,
+            21,
+            31,
+            49
+        ],
+        "Superzahl": 0,
+        "Ziehung": [
+            3,
+            5,
+            10,
+            16,
+            32,
+            44
+        ],
+        "Ziehung_Super": 7,
+        "Ergebnis": {
+            "Gewinnklasse": 0,
+            "Gewinnernachricht": "Kein Gewinn",
+            "Gewinnpreis": 0.0
+        }
+    }
+]
