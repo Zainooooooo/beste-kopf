@@ -281,5 +281,7 @@ function startClock() {
   setInterval(updateClock, 1000);
 }
 
-fetchStatus();
-startClock();
+document.addEventListener('DOMContentLoaded', () => {
+  startClock();
+  fetchStatus();
+});

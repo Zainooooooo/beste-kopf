@@ -49,9 +49,10 @@ body {
 }
 
 .hero-card {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: start;
 }
 
 .eyebrow {
@@ -82,9 +83,10 @@ body {
 
 .hero-meta {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: flex-start;
 }
 
 .hero-pill {
