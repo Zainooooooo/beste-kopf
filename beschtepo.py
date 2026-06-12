@@ -327,8 +327,6 @@ def api_status():
     hist = get_history()
     last = hist[0] if hist else None
     return {
-        "host": socket.gethostname(),
-        "platform": platform.system(),
         "uptime_h": round((time.time() - _boot_time) / 3600, 1),
         "target_path": cfg["target"],
         "target_connected": target_ok,
