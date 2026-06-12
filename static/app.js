@@ -82,8 +82,8 @@ function selectTarget(path) {
 
 function formatStatus(data) {
   const lines = [];
-  lines.push(`Host: ${data.host}`);
-  lines.push(`Platform: ${data.platform}`);
+  // Host and platform are no longer provided by the API
+  // (removed from server-side for privacy); skip displaying them.
   lines.push(`Uptime: ${data.uptime_h} h`);
   lines.push(`Backup-Ziel: ${data.target_path || 'nicht gesetzt'}`);
   lines.push(`Ziel verbunden: ${data.target_connected ? 'Ja' : 'Nein'}`);
