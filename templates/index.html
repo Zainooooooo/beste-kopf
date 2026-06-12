@@ -59,6 +59,7 @@
               <div class="field-row">
                 <input id="sourcePath" type="text" readonly placeholder="Tippe unten, um eine Quelle zu wählen" />
                 <button id="saveSource">Speichern</button>
+                <button id="clearSource" class="secondary">Löschen</button>
               </div>
             </div>
             <div class="selection-box">
@@ -66,6 +67,7 @@
               <div class="field-row">
                 <input id="targetPath" type="text" readonly placeholder="Tippe unten, um ein Ziel zu wählen" />
                 <button id="saveTarget">Speichern</button>
+                <button id="clearTarget" class="secondary">Löschen</button>
               </div>
             </div>
           </div>
@@ -91,6 +93,11 @@
 
           <div class="browse-panel">
             <div class="breadcrumbs" id="breadcrumbs"></div>
+            <div class="browse-actions">
+              <button id="goUp" type="button" class="secondary">↑ Einen Ordner zurück</button>
+              <button id="selectCurrentSource" type="button" class="secondary">Aktuellen Ordner als Quelle</button>
+              <button id="selectCurrentTarget" type="button" class="secondary">Aktuellen Ordner als Ziel</button>
+            </div>
             <div class="browse-list" id="browseList">Wähle einen Ordner aus.</div>
           </div>
         </article>
@@ -110,6 +117,6 @@
       </div>
     </section>
   </main>
-  <script src="/static/app.js?v=2"></script>
+  <script src="/static/app.js?v=3"></script>
 </body>
 </html>

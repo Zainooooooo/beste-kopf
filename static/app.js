@@ -80,6 +80,70 @@ function selectTarget(path) {
   loadDirectory(path);
 }
 
+async function clearSource() {
+  sourcePathInput.value = '';
+  statusText.textContent = 'Quelle entfernt.';
+  const currentConfig = await action('/api/config');
+  const payload = {
+    ...currentConfig,
+    sources: [],
+  };
+  await action('/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await fetchStatus();
+}
+
+async function clearTarget() {
+  targetPathInput.value = '';
+  statusText.textContent = 'Ziel entfernt.';
+  const currentConfig = await action('/api/config');
+  const payload = {
+    ...currentConfig,
+    target: '',
+  };
+  await action('/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await fetchStatus();
+}
+
+function normalizePath(path) {
+  if (!path) return '';
+  return path.replace(/\\/g, '/');
+}
+
+function buildParentPath(path) {
+  if (!path) return '';
+
+  const normalized = path.replace(/\\/g, '/').replace(/\/+$/, '');
+  const driveMatch = normalized.match(/^([A-Za-z]:)(?:\/|$)(.*)$/);
+  if (driveMatch) {
+    const drive = driveMatch[1];
+    const rest = driveMatch[2];
+    if (!rest) {
+      return '';
+    }
+    const parts = rest.split('/').filter(Boolean);
+    parts.pop();
+    if (!parts.length) {
+      return `${drive}\\`;
+    }
+    return `${drive}\\${parts.join('\\')}`;
+  }
+
+  const parts = normalized.split('/').filter(Boolean);
+  parts.pop();
+  if (!parts.length) {
+    return '';
+  }
+  return '/' + parts.join('/');
+}
+
 function formatStatus(data) {
   const lines = [];
   // Host and platform are no longer provided by the API
@@ -132,8 +196,8 @@ async function action(url, options = {}) {
 }
 
 function renderBreadcrumbs(path) {
-  const parts = path ? path.split(/\\|\//).filter(Boolean) : [];
-  let prefix = path && path.startsWith('/') ? '/' : '';
+  const normalized = path ? path.replace(/\\/g, '/') : '';
+  const parts = normalized ? normalized.split('/').filter(Boolean) : [];
   breadcrumbs.innerHTML = '';
   const rootButton = document.createElement('button');
   rootButton.type = 'button';
@@ -142,16 +206,20 @@ function renderBreadcrumbs(path) {
   rootButton.addEventListener('click', () => loadDirectory(''));
   breadcrumbs.appendChild(rootButton);
 
-  let cur = prefix;
+  let cur = '';
+  const isWindowsDrive = /^[A-Za-z]:$/.test(parts[0]);
   parts.forEach((part, index) => {
-    cur += part;
+    if (index === 0 && isWindowsDrive) {
+      cur = `${part}\\`;
+    } else {
+      cur += (cur && !cur.endsWith('\\') ? '\\' : '') + part;
+    }
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'breadcrumb-item';
     button.textContent = part;
     button.addEventListener('click', () => loadDirectory(cur));
     breadcrumbs.appendChild(button);
-    cur += '/';
   });
 }
 
@@ -169,16 +237,43 @@ async function loadDirectory(path) {
     }
     data.entries.forEach((entry) => {
       if (!entry.is_dir) return;
-      const item = document.createElement('button');
-      item.type = 'button';
-      item.className = 'browse-item';
-      item.textContent = entry.name;
-      item.addEventListener('click', () => {
-        const newPath = entry.path;
-        selectTarget(newPath);
-        loadDirectory(newPath);
+      const card = document.createElement('div');
+      card.className = 'browse-entry';
+
+      const label = document.createElement('button');
+      label.type = 'button';
+      label.className = 'browse-item';
+      label.textContent = entry.name;
+      label.addEventListener('click', () => {
+        loadDirectory(entry.path);
       });
-      browseList.appendChild(item);
+
+      const actions = document.createElement('div');
+      actions.className = 'browse-entry-actions';
+
+      const asSource = document.createElement('button');
+      asSource.type = 'button';
+      asSource.className = 'drive-button';
+      asSource.textContent = 'Als Quelle';
+      asSource.addEventListener('click', () => {
+        sourcePathInput.value = entry.path;
+        statusText.textContent = `Quelle ausgewählt: ${entry.path}`;
+      });
+
+      const asTarget = document.createElement('button');
+      asTarget.type = 'button';
+      asTarget.className = 'drive-button';
+      asTarget.textContent = 'Als Ziel';
+      asTarget.addEventListener('click', () => {
+        targetPathInput.value = entry.path;
+        statusText.textContent = `Ziel ausgewählt: ${entry.path}`;
+      });
+
+      actions.appendChild(asSource);
+      actions.appendChild(asTarget);
+      card.appendChild(label);
+      card.appendChild(actions);
+      browseList.appendChild(card);
     });
   } catch (error) {
     browseList.textContent = 'Fehler beim Laden des Ordnerverzeichnisses.';
@@ -208,6 +303,38 @@ document.getElementById('startBackup').addEventListener('click', async () => {
 });
 
 document.getElementById('checkStatus').addEventListener('click', fetchStatus);
+
+if (document.getElementById('clearSource')) {
+  document.getElementById('clearSource').addEventListener('click', clearSource);
+}
+if (document.getElementById('clearTarget')) {
+  document.getElementById('clearTarget').addEventListener('click', clearTarget);
+}
+if (document.getElementById('goUp')) {
+  document.getElementById('goUp').addEventListener('click', () => {
+    loadDirectory(buildParentPath(currentBrowsePath));
+  });
+}
+if (document.getElementById('selectCurrentSource')) {
+  document.getElementById('selectCurrentSource').addEventListener('click', () => {
+    if (!currentBrowsePath) {
+      statusText.textContent = 'Navigiere zuerst zu einem Ordner.';
+      return;
+    }
+    sourcePathInput.value = currentBrowsePath;
+    statusText.textContent = `Quelle ausgewählt: ${currentBrowsePath}`;
+  });
+}
+if (document.getElementById('selectCurrentTarget')) {
+  document.getElementById('selectCurrentTarget').addEventListener('click', () => {
+    if (!currentBrowsePath) {
+      statusText.textContent = 'Navigiere zuerst zu einem Ordner.';
+      return;
+    }
+    targetPathInput.value = currentBrowsePath;
+    statusText.textContent = `Ziel ausgewählt: ${currentBrowsePath}`;
+  });
+}
 
 document.getElementById('saveSource').addEventListener('click', async () => {
   if (!sourcePathInput.value.trim()) {
