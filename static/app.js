@@ -139,7 +139,7 @@ function buildParentPath(path) {
   const parts = normalized.split('/').filter(Boolean);
   parts.pop();
   if (!parts.length) {
-    return '';
+    return '/';
   }
   return '/' + parts.join('/');
 }
@@ -196,8 +196,14 @@ async function action(url, options = {}) {
 }
 
 function renderBreadcrumbs(path) {
-  const normalized = path ? path.replace(/\\/g, '/') : '';
-  const parts = normalized ? normalized.split('/').filter(Boolean) : [];
+  const normalized = path || '';
+  const isWindows = /^[A-Za-z]:[\\/]/.test(normalized);
+  const cleaned = isWindows
+    ? normalized.replace(/[\\/]+$/, '').replace(/\//g, '\\')
+    : normalized.replace(/\\/g, '/').replace(/\/+$/, '');
+  const parts = cleaned
+    ? (isWindows ? cleaned.split('\\').filter(Boolean) : cleaned.split('/').filter(Boolean))
+    : [];
   breadcrumbs.innerHTML = '';
   const rootButton = document.createElement('button');
   rootButton.type = 'button';
@@ -206,29 +212,56 @@ function renderBreadcrumbs(path) {
   rootButton.addEventListener('click', () => loadDirectory(''));
   breadcrumbs.appendChild(rootButton);
 
-  let cur = '';
-  const isWindowsDrive = /^[A-Za-z]:$/.test(parts[0]);
-  parts.forEach((part, index) => {
-    if (index === 0 && isWindowsDrive) {
-      cur = `${part}\\`;
-    } else {
-      cur += (cur && !cur.endsWith('\\') ? '\\' : '') + part;
+  if (isWindows) {
+    if (parts.length > 0) {
+      let cur = `${parts[0]}\\`;
+      const drivePath = cur;
+      const driveButton = document.createElement('button');
+      driveButton.type = 'button';
+      driveButton.className = 'breadcrumb-item';
+      driveButton.textContent = parts[0];
+      driveButton.addEventListener('click', () => loadDirectory(drivePath));
+      breadcrumbs.appendChild(driveButton);
+
+      for (let i = 1; i < parts.length; i += 1) {
+        if (!cur.endsWith('\\')) {
+          cur += '\\';
+        }
+        cur += parts[i];
+        const crumbPath = cur;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'breadcrumb-item';
+        button.textContent = parts[i];
+        button.addEventListener('click', () => loadDirectory(crumbPath));
+        breadcrumbs.appendChild(button);
+      }
     }
+    return;
+  }
+
+  let cur = normalized.startsWith('/') ? '/' : '';
+  parts.forEach((part) => {
+    if (cur && !cur.endsWith('/')) {
+      cur += '/';
+    }
+    cur += part;
+    const crumbPath = cur;
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'breadcrumb-item';
     button.textContent = part;
-    button.addEventListener('click', () => loadDirectory(cur));
+    button.addEventListener('click', () => loadDirectory(crumbPath));
     breadcrumbs.appendChild(button);
   });
 }
 
 async function loadDirectory(path) {
-  currentBrowsePath = path;
   try {
     const url = path ? `/api/browse?path=${encodeURIComponent(path)}` : '/api/browse';
     const res = await fetch(url);
     const data = await res.json();
+    currentBrowsePath = data.path || path || '';
     renderBreadcrumbs(data.path || '');
     browseList.innerHTML = '';
     if (data.entries.length === 0) {
