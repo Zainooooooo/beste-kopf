@@ -248,31 +248,7 @@ async function loadDirectory(path) {
         loadDirectory(entry.path);
       });
 
-      const actions = document.createElement('div');
-      actions.className = 'browse-entry-actions';
-
-      const asSource = document.createElement('button');
-      asSource.type = 'button';
-      asSource.className = 'drive-button';
-      asSource.textContent = 'Als Quelle';
-      asSource.addEventListener('click', () => {
-        sourcePathInput.value = entry.path;
-        statusText.textContent = `Quelle ausgewählt: ${entry.path}`;
-      });
-
-      const asTarget = document.createElement('button');
-      asTarget.type = 'button';
-      asTarget.className = 'drive-button';
-      asTarget.textContent = 'Als Ziel';
-      asTarget.addEventListener('click', () => {
-        targetPathInput.value = entry.path;
-        statusText.textContent = `Ziel ausgewählt: ${entry.path}`;
-      });
-
-      actions.appendChild(asSource);
-      actions.appendChild(asTarget);
       card.appendChild(label);
-      card.appendChild(actions);
       browseList.appendChild(card);
     });
   } catch (error) {
