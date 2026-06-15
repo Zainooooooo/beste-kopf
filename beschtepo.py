@@ -375,10 +375,10 @@ def api_browse(path: str = ""):
             # Roots
             if platform.system() == "Windows":
                 import string
-            drives = [f"{d}:\\" for d in string.ascii_uppercase
-                      if Path(f"{d}:\\").exists()]
-            return {"path": "", "entries": [
-                {"name": d, "path": d, "is_dir": True} for d in drives]}
+                drives = [f"{d}:\\" for d in string.ascii_uppercase
+                          if Path(f"{d}:\\").exists()]
+                return {"path": "", "entries": [
+                    {"name": d, "path": d, "is_dir": True} for d in drives]}
             else:
                 p = Path("/")
         else:
